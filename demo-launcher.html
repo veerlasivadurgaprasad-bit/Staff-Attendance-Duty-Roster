@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FirstCry Intellitots - Staff Attendance & Duty Roster</title>
+  
+  <!-- Favicon Mock -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E" />
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* DESIGN SYSTEM TOKEN WRAPPERS */
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --secondary: #a855f7;
+      --secondary-hover: #9333ea;
+      --accent: #3b82f6;
+      --accent-light: #eff6ff;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f1f5f9;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fefbeb;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --info: #06b6d4;
+      --info-light: #ecfeff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-focus: #cbd5e1;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-premium: 0 20px 25px -5px rgba(99, 102, 241, 0.05), 0 8px 10px -6px rgba(99, 102, 241, 0.05);
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --sidebar-width: 260px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; color: var(--text-primary); font-weight: 600; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade { animation: fadeIn var(--transition-normal); }
+    .app-container { display: flex; min-height: 100vh; width: 100%; }
+    .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; background-color: var(--background); }
+    .page-container { flex: 1; padding: 24px 32px; overflow-y: auto; max-width: 1600px; width: 100%; margin: 0 auto; animation: fadeIn var(--transition-normal); }
+    
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); transition: transform var(--transition-normal), box-shadow var(--transition-normal); }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg), var(--shadow-premium); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 500; padding: 10px 16px; border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer; transition: all var(--transition-fast); white-space: nowrap; }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-secondary { background-color: var(--secondary); color: white; }
+    .btn-secondary:hover { background-color: var(--secondary-hover); }
+    .btn-outline { background-color: transparent; border-color: var(--border); color: var(--text-secondary); }
+    .btn-outline:hover { background-color: var(--surface-hover); border-color: var(--border-focus); color: var(--text-primary); }
+    .btn-danger { background-color: var(--danger); color: white; }
+    .btn-danger:hover { background-color: #dc2626; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 6px; color: var(--text-secondary); }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-family: 'Inter', sans-serif; font-size: 0.875rem; color: var(--text-primary); background-color: white; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+    
+    .grid-cols-1 { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 20px; }
+    .grid-cols-2 { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 20px; }
+    .grid-cols-3 { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 20px; }
+    .grid-cols-4 { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 20px; }
+    
+    @media (min-width: 768px) {
+      .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+      .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    
+    .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
+    .badge-present { background-color: var(--success-light); color: var(--success); }
+    .badge-absent { background-color: var(--danger-light); color: var(--danger); }
+    .badge-halfday { background-color: var(--warning-light); color: var(--warning); }
+    .badge-leave { background-color: var(--info-light); color: var(--info); }
+    .badge-active { background-color: var(--success-light); color: var(--success); }
+    .badge-inactive { background-color: var(--danger-light); color: var(--danger); }
+    .badge-onleave { background-color: var(--info-light); color: var(--info); }
+    .badge-low { background-color: var(--success-light); color: var(--success); }
+    .badge-medium { background-color: var(--warning-light); color: var(--warning); }
+    .badge-high { background-color: var(--danger-light); color: var(--danger); }
+    .badge-pending { background-color: #f1f5f9; color: #64748b; }
+    .badge-inprogress { background-color: #eff6ff; color: #2563eb; }
+    .badge-completed { background-color: var(--success-light); color: var(--success); }
+    
+    .table-container { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .custom-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+    .custom-table th { background-color: #f8fafc; padding: 16px 20px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); font-family: 'Outfit', sans-serif; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    .custom-table td { padding: 16px 20px; color: var(--text-primary); border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .custom-table tr:last-child td { border-bottom: none; }
+    .custom-table tr:hover td { background-color: var(--background); }
+    
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease; }
+    .modal-content { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 550px; padding: 28px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 1.25rem; }
+    .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); transition: color var(--transition-fast); }
+    .modal-close:hover { color: var(--text-primary); }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-focus); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- APPLICATION CODE WRITTEN IN ES6 JSX COMPILING IN BROWSER -->
+  <script type="text/babel">
+    const { useState, useEffect, createContext, useContext } = React;
+
+    // ========================================================
+    // DATABASE / LOCAL STORAGE SIMULATOR
+    // ========================================================
+    const LOCAL_STORAGE_KEY = 'firstcry_intellitots_db';
+    
+    const getInitialDB = () => {
+      return {
+        users: [
+          { id: 1, name: 'Admin User', email: 'admin@firstcry.com', role: 'Admin' },
+          { id: 2, name: 'Priya Sharma', email: 'priya.sharma@firstcry.com', role: 'Centre Head' },
+          { id: 3, name: 'Ananya Sen', email: 'ananya.sen@firstcry.com', role: 'Teacher' },
+          { id: 4, name: 'Meera Nair', email: 'meera.nair@firstcry.com', role: 'Teacher' },
+          { id: 5, name: 'Sita Devi', email: 'sita.devi@firstcry.com', role: 'Helper' },
+          { id: 6, name: 'Rani Mukherji', email: 'rani.m@firstcry.com', role: 'Helper' }
+        ],
+        staff: [
+          { staff_id: 'T-001', user_id: 3, name: 'Ananya Sen', email: 'ananya.sen@firstcry.com', role: 'Teacher', designation: 'Toddler Lead Teacher', department: 'Early Years', phone: '9876543210', shift: 'Morning Shift (08:00 AM - 02:00 PM)', status: 'Active' },
+          { staff_id: 'T-002', user_id: 4, name: 'Meera Nair', email: 'meera.nair@firstcry.com', role: 'Teacher', designation: 'Preschool Teacher', department: 'Preschool', phone: '9876543211', shift: 'General Shift (09:00 AM - 05:00 PM)', status: 'Active' },
+          { staff_id: 'H-001', user_id: 5, name: 'Sita Devi', email: 'sita.devi@firstcry.com', role: 'Helper', designation: 'Classroom Attendant', department: 'Daycare Support', phone: '9876543212', shift: 'Morning Shift (08:00 AM - 02:00 PM)', status: 'Active' },
+          { staff_id: 'H-002', user_id: 6, name: 'Rani Mukherji', email: 'rani.m@firstcry.com', role: 'Helper', designation: 'Daycare Helper', department: 'Daycare Support', phone: '9876543213', shift: 'Daycare Shift (10:00 AM - 07:00 PM)', status: 'Active' }
+        ],
+        classrooms: [
+          { classroom_id: 1, classroom_name: 'Playgroup - Nestling', teacher_id: 'T-001', teacherName: 'Ananya Sen', helper_id: 'H-001', helperName: 'Sita Devi', capacity: 12, status: 'Active' },
+          { classroom_id: 2, classroom_name: 'Nursery - Fledglings', teacher_id: 'T-002', teacherName: 'Meera Nair', helper_id: 'H-002', helperName: 'Rani Mukherji', capacity: 15, status: 'Active' },
+          { classroom_id: 3, classroom_name: 'Daycare - Cozy Cabin', teacher_id: null, teacherName: 'Unassigned', helper_id: null, helperName: 'Unassigned', capacity: 20, status: 'Active' }
+        ],
+        attendance: [
+          { attendance_id: 1, staff_id: 'T-001', name: 'Ananya Sen', role: 'Teacher', designation: 'Toddler Lead Teacher', date: '2026-06-11', check_in: '07:55:00', check_out: '14:05:00', attendance_status: 'Present' },
+          { attendance_id: 2, staff_id: 'T-002', name: 'Meera Nair', role: 'Teacher', designation: 'Preschool Teacher', date: '2026-06-11', check_in: '08:58:00', check_out: '17:02:00', attendance_status: 'Present' },
+          { attendance_id: 3, staff_id: 'H-001', name: 'Sita Devi', role: 'Helper', designation: 'Classroom Attendant', date: '2026-06-11', check_in: '08:10:00', check_out: '14:00:00', attendance_status: 'Present' },
+          { attendance_id: 4, staff_id: 'H-002', name: 'Rani Mukherji', role: 'Helper', designation: 'Daycare Helper', date: '2026-06-11', check_in: null, check_out: null, attendance_status: 'Absent' },
+          { attendance_id: 5, staff_id: 'T-001', name: 'Ananya Sen', role: 'Teacher', designation: 'Toddler Lead Teacher', date: '2026-06-12', check_in: '07:52:00', check_out: null, attendance_status: 'Present' },
+          { attendance_id: 6, staff_id: 'T-002', name: 'Meera Nair', role: 'Teacher', designation: 'Preschool Teacher', date: '2026-06-12', check_in: '09:05:00', check_out: null, attendance_status: 'Present' },
+          { attendance_id: 7, staff_id: 'H-001', name: 'Sita Devi', role: 'Helper', designation: 'Classroom Attendant', date: '2026-06-12', check_in: null, check_out: null, attendance_status: 'Leave' }
+        ],
+        duty_roster: [
+          { roster_id: 1, staff_id: 'T-001', staff_name: 'Ananya Sen', role: 'Teacher', classroom_id: 1, classroom_name: 'Playgroup - Nestling', shift: 'Morning Shift (08:00 AM - 02:00 PM)', assigned_date: '2026-06-12' },
+          { roster_id: 2, staff_id: 'T-002', staff_name: 'Meera Nair', role: 'Teacher', classroom_id: 2, classroom_name: 'Nursery - Fledglings', shift: 'General Shift (09:00 AM - 05:00 PM)', assigned_date: '2026-06-12' },
+          { roster_id: 3, staff_id: 'H-001', staff_name: 'Sita Devi', role: 'Helper', classroom_id: 1, classroom_name: 'Playgroup - Nestling', shift: 'Morning Shift (08:00 AM - 02:00 PM)', assigned_date: '2026-06-12' },
+          { roster_id: 4, staff_id: 'H-002', staff_name: 'Rani Mukherji', role: 'Helper', classroom_id: 3, classroom_name: 'Daycare - Cozy Cabin', shift: 'Daycare Shift (10:00 AM - 07:00 PM)', assigned_date: '2026-06-12' }
+        ],
+        tasks: [
+          { task_id: 1, assigned_to: 'T-001', assigned_name: 'Ananya Sen', title: 'Sanitize Learning Material', description: 'Disinfect all wooden blocks and sensory play materials in the Nursery classroom.', priority: 'High', due_date: '2026-06-12', status: 'Pending' },
+          { task_id: 2, assigned_to: 'T-002', assigned_name: 'Meera Nair', title: 'Prepare Weekly Lesson Plan', description: 'Upload lesson plan for Next Week theme (Animals & Habitats).', priority: 'Medium', due_date: '2026-06-14', status: 'In Progress' },
+          { task_id: 3, assigned_to: 'H-002', assigned_name: 'Rani Mukherji', title: 'Mid-day Meal Service Prep', description: 'Arrange high chairs and assist in feeding the Toddler group with milk & fruit puree.', priority: 'High', due_date: '2026-06-12', status: 'Pending' }
+        ],
+        notifications: [
+          { notification_id: 1, user_id: 3, message: 'Welcome! You have been assigned to Playgroup - Nestling for the morning shift today.', type: 'Duty Change', created_at: new Date().toISOString(), is_read: false },
+          { notification_id: 2, user_id: 5, message: 'Your leave request for June 12, 2026, has been approved by the Centre Head.', type: 'Attendance', created_at: new Date().toISOString(), is_read: false },
+          { notification_id: 3, user_id: 1, message: 'Staff shortage warning: Helper H-001 is on leave. High priority tasks reassigned.', type: 'Shift Alert', created_at: new Date().toISOString(), is_read: false }
+        ]
+      };
+    };
+
+    const getDB = () => {
+      const dbStr = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!dbStr) {
+        const fresh = getInitialDB();
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(fresh));
+        return fresh;
+      }
+      return JSON.parse(dbStr);
+    };
+
+    const saveDB = (data) => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    };
+
+    // ========================================================
+    // AUTHENTICATION CONTEXT PROVIDER
+    // ========================================================
+    const AuthContext = createContext(null);
+
+    const AuthProvider = ({ children }) => {
+      const [user, setUser] = useState(null);
+      
+      useEffect(() => {
+        const activeUser = localStorage.getItem('demo_user');
+        if (activeUser) {
+          setUser(JSON.parse(activeUser));
+        }
+      }, []);
+
+      const login = (email, password, role) => {
+        const db = getDB();
+        const found = db.users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.role === role);
+        if (!found) {
+          throw new Error('Invalid email or role credentials.');
+        }
+        const staff = db.staff.find(s => s.user_id === found.id);
+        const sessionUser = {
+          id: found.id,
+          name: found.name,
+          email: found.email,
+          role: found.role,
+          staff_id: staff ? staff.staff_id : null
+        };
+        setUser(sessionUser);
+        localStorage.setItem('demo_user', JSON.stringify(sessionUser));
+        return sessionUser;
+      };
+
+      const logout = () => {
+        setUser(null);
+        localStorage.removeItem('demo_user');
+      };
+
+      return (
+        <AuthContext.Provider value={{
+          user, login, logout,
+          isAdmin: () => user?.role === 'Admin',
+          isCentreHead: () => user?.role === 'Centre Head',
+          isPrivileged: () => user?.role === 'Admin' || user?.role === 'Centre Head'
+        }}>
+          {children}
+        </AuthContext.Provider>
+      );
+    };
+
+    const useAuth = () => useContext(AuthContext);
+
+    // ========================================================
+    // GENERAL LAYOUT WIDGETS
+    // ========================================================
+    const KPIWidget = ({ title, value, subtext, icon, type = 'default' }) => {
+      const getColor = () => {
+        switch (type) {
+          case 'success': return '#10b981';
+          case 'warning': return '#f59e0b';
+          case 'danger': return '#ef4444';
+          case 'info': return '#06b6d4';
+          case 'primary': return '#6366f1';
+          default: return '#64748b';
+        }
+      };
+      const color = getColor();
+      return (
+        <div className="card card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: `5px solid ${color}` }}>
+          <div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase' }}>{title}</span>
+            <h3 style={{ fontSize: '1.6rem', fontFamily: 'Outfit', fontWeight: '800', marginTop: '4px' }}>{value}</h3>
+            {subtext && <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{subtext}</span>}
+          </div>
+          <div style={{ padding: '10px', borderRadius: '8px', color: color, backgroundColor: `${color}15` }}>
+            {icon}
+          </div>
+        </div>
+      );
+    };
+
+    const ChartWidget = ({ title, data, type = 'bar' }) => {
+      if (type === 'bar') {
+        return (
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '300px' }}>
+            <h3 style={{ fontSize: '0.9rem', fontFamily: 'Outfit', marginBottom: '20px' }}>{title}</h3>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+              {data.map((item, i) => (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--primary)', marginBottom: '4px' }}>{item.rate}%</span>
+                  <div style={{ width: '60%', height: `${item.rate}%`, backgroundImage: 'linear-gradient(to top, var(--primary), var(--secondary))', borderRadius: '4px 4px 0 0' }}></div>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '6px' }}>{item.day}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      if (type === 'progress') {
+        return (
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '300px' }}>
+            <h3 style={{ fontSize: '0.9rem', fontFamily: 'Outfit', marginBottom: '20px' }}>{title}</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto' }}>
+              {data.map((item, i) => (
+                <div key={i}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
+                    <span>{item.month}</span>
+                    <span style={{ fontWeight: '700', color: 'var(--secondary)' }}>{item.rate}%</span>
+                  </div>
+                  <div style={{ height: '6px', backgroundColor: 'var(--surface-hover)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${item.rate}%`, backgroundColor: 'var(--secondary)' }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    const Modal = ({ isOpen, onClose, title, children }) => {
+      if (!isOpen) return null;
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ fontFamily: 'Outfit', fontWeight: '700' }}>{title}</h3>
+              <button className="modal-close" onClick={onClose} style={{ border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button>
+            </div>
+            <div>{children}</div>
+          </div>
+        </div>
+      );
+    };
+
+    // ========================================================
+    // COMPONENT PAGES
+    // ========================================================
+
+    // 1. LOGIN PAGE
+    const LoginPage = () => {
+      const { login } = useAuth();
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [role, setRole] = useState('Admin');
+      const [error, setError] = useState('');
+
+      const handlePreset = (r) => {
+        setRole(r);
+        if (r === 'Admin') { setEmail('admin@firstcry.com'); setPassword('admin123'); }
+        else if (r === 'Centre Head') { setEmail('priya.sharma@firstcry.com'); setPassword('head123'); }
+        else if (r === 'Teacher') { setEmail('ananya.sen@firstcry.com'); setPassword('teacher123'); }
+        else if (r === 'Helper') { setEmail('sita.devi@firstcry.com'); setPassword('helper123'); }
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+          login(email, password, role);
+        } catch (err) {
+          setError(err.message);
+        }
+      };
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '20px' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '440px', padding: '36px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.5rem', color: 'var(--primary)' }}>FirstCry Intellitots</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Staff Attendance & Duty Roster System</p>
+            </div>
+            
+            {error && <div style={{ backgroundColor: 'var(--danger-light)', color: 'var(--danger)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.75rem', marginBottom: '16px' }}>{error}</div>}
+            
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Role Selection</label>
+                <select className="form-select" value={role} onChange={e => setRole(e.target.value)}>
+                  <option value="Admin">Admin</option>
+                  <option value="Centre Head">Centre Head</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Helper">Helper</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input type="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)} required />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px' }}>Secure Login</button>
+            </form>
+
+            <div style={{ marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '8px' }}>CLICK FOR QUICK DEMO LOGIN</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                {['Admin', 'Centre Head', 'Teacher', 'Helper'].map(r => (
+                  <button key={r} type="button" className="btn btn-outline" style={{ fontSize: '0.65rem', padding: '6px' }} onClick={() => handlePreset(r)}>{r}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 2. DASHBOARD PAGE
+    const DashboardPage = ({ setCurrentPage }) => {
+      const [data, setData] = useState(null);
+      
+      useEffect(() => {
+        const db = getDB();
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Stats
+        const total = db.staff.length;
+        const present = db.attendance.filter(a => a.date === today && a.attendance_status === 'Present').length;
+        const absent = db.attendance.filter(a => a.date === today && a.attendance_status === 'Absent').length;
+        const leaves = db.attendance.filter(a => a.date === today && a.attendance_status === 'Leave').length;
+        const activeRosters = db.duty_roster.filter(r => r.assigned_date === today);
+        const teachers = activeRosters.filter(r => r.role === 'Teacher').length;
+        const helpers = activeRosters.filter(r => r.role === 'Helper').length;
+        const openTasks = db.tasks.filter(t => t.status !== 'Completed').length;
+        
+        // Chart metrics
+        const weekly = [
+          { day: 'Mon', rate: 90 }, { day: 'Tue', rate: 92 }, { day: 'Wed', rate: 88 }, { day: 'Thu', rate: 94 }, { day: 'Fri', rate: total > 0 ? Math.round((present / total) * 100) || 92 : 92 }
+        ];
+
+        const monthly = [
+          { month: 'Jan', rate: 92 }, { month: 'Feb', rate: 94 }, { month: 'Mar', rate: 91 }, { month: 'Apr', rate: 95 }, { month: 'May', rate: 93 }
+        ];
+
+        // AI shortage checks
+        const activeRooms = db.classrooms.filter(c => c.status === 'Active');
+        const shortage = [];
+        activeRooms.forEach(room => {
+          const hasTeacher = activeRosters.some(x => x.classroom_id === room.classroom_id && x.role === 'Teacher');
+          const hasHelper = activeRosters.some(x => x.classroom_id === room.classroom_id && x.role === 'Helper');
+          if (!hasTeacher) shortage.push(`Staff Shortage Alert: No Teacher assigned to "${room.classroom_name}" today.`);
+          if (!hasHelper) shortage.push(`Staff Shortage Alert: No Helper assigned to "${room.classroom_name}" today.`);
+        });
+
+        setData({
+          kpis: { total, present, absent, leaves, teachers, helpers, openTasks },
+          weekly,
+          monthly,
+          shortage
+        });
+      }, []);
+
+      if (!data) return null;
+
+      return (
+        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* AI Banner warnings */}
+          {data.shortage.length > 0 && (
+            <div className="card" style={{ backgroundImage: 'linear-gradient(135deg, #fef2f2, #fffbeb)', borderColor: 'rgba(239, 68, 68, 0.15)' }}>
+              <h4 style={{ color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', marginBottom: '8px' }}>⚠️ AI Safety Warning Alerts</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem' }}>
+                {data.shortage.map((item, i) => <div key={i} style={{ color: 'var(--text-secondary)' }}>{item}</div>)}
+              </div>
+            </div>
+          )}
+
+          {/* KPIs Grid */}
+          <div className="grid-cols-4">
+            <KPIWidget title="Total Staff" value={data.kpis.total} subtext="Registered workforce" type="primary" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z" /></svg>} />
+            <KPIWidget title="Present Today" value={data.kpis.present} subtext="Teachers & Helpers checked in" type="success" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" /></svg>} />
+            <KPIWidget title="Teachers on Duty" value={data.kpis.teachers} subtext="Classrooms coverage" type="info" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" /></svg>} />
+            <KPIWidget title="Pending Checklist Tasks" value={data.kpis.openTasks} subtext="Requires completion attention" type="warning" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10" /></svg>} />
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid-cols-2">
+            <ChartWidget title="Weekly Staff Attendance Rate (%)" data={data.weekly} type="bar" />
+            <ChartWidget title="Monthly Operations Level (%)" data={data.monthly} type="progress" />
+          </div>
+
+          {/* Quick actions wrapper */}
+          <div className="card">
+            <h3 style={{ fontSize: '0.9rem', marginBottom: '14px', fontFamily: 'Outfit' }}>Intellitots Centre Head Actions</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <button className="btn btn-primary" onClick={() => setCurrentPage('attendance')}>Mark Attendance Roll</button>
+              <button className="btn btn-secondary" onClick={() => setCurrentPage('roster')}>Auto-Allocate Roster</button>
+              <button className="btn btn-outline" onClick={() => setCurrentPage('classrooms')}>Modify Class Allocations</button>
+              <button className="btn btn-outline" onClick={() => setCurrentPage('reports')}>Export Data Report</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 3. STAFF MANAGEMENT PAGE
+    const StaffPage = () => {
+      const { isPrivileged } = useAuth();
+      const [db, setDb] = useState(getDB());
+      const [search, setSearch] = useState('');
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      
+      const [form, setForm] = useState({ staff_id: '', name: '', role: 'Teacher', designation: '', department: '', phone: '', email: '', shift: 'General Shift (09:00 AM - 05:00 PM)', status: 'Active' });
+
+      const handleAdd = (e) => {
+        e.preventDefault();
+        const copy = { ...db };
+        
+        // Add User Account
+        const newUserId = copy.users.length + 1;
+        copy.users.push({ id: newUserId, name: form.name, email: form.email, role: form.role });
+        
+        // Add Staff Profile
+        copy.staff.push({ ...form, user_id: newUserId });
+        
+        saveDB(copy);
+        setDb(copy);
+        setIsModalOpen(false);
+        setForm({ staff_id: '', name: '', role: 'Teacher', designation: '', department: '', phone: '', email: '', shift: 'General Shift (09:00 AM - 05:00 PM)', status: 'Active' });
+      };
+
+      const handleDelete = (id) => {
+        if(confirm("Confirm account deletion?")) {
+          const copy = { ...db };
+          copy.staff = copy.staff.filter(s => s.staff_id !== id);
+          saveDB(copy);
+          setDb(copy);
+        }
+      };
+
+      const filtered = db.staff.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.staff_id.toLowerCase().includes(search.toLowerCase()));
+
+      return (
+        <div className="page-container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+            <input type="text" placeholder="Search staff id/name..." className="form-input" style={{ maxWidth: '300px' }} value={search} onChange={e => setSearch(e.target.value)} />
+            {isPrivileged() && <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Add Staff</button>}
+          </div>
+
+          <div className="table-container">
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>Staff ID</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Shift</th>
+                  <th>Status</th>
+                  {isPrivileged() && <th>Action</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(s => (
+                  <tr key={s.staff_id}>
+                    <td style={{ fontWeight: '700' }}>{s.staff_id}</td>
+                    <td style={{ fontWeight: '600' }}>{s.name}</td>
+                    <td><span className={`badge ${s.role === 'Teacher' ? 'badge-present' : 'badge-leave'}`}>{s.role}</span></td>
+                    <td>{s.department}</td>
+                    <td>{s.designation}</td>
+                    <td>{s.phone}</td>
+                    <td>{s.email}</td>
+                    <td style={{ fontSize: '0.75rem' }}>{s.shift.split(' ')[0]}</td>
+                    <td><span className={`badge badge-${s.status.toLowerCase().replace(' ', '')}`}>{s.status}</span></td>
+                    {isPrivileged() && (
+                      <td>
+                        <button className="btn btn-danger" style={{ padding: '4px 8px', fontSize: '0.7rem' }} onClick={() => handleDelete(s.staff_id)}>Delete</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Register Roster Staff">
+            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-group"><label className="form-label">Staff ID</label><input type="text" className="form-input" value={form.staff_id} onChange={e => setForm({...form, staff_id: e.target.value})} required /></div>
+              <div className="form-group"><label className="form-label">Full Name</label><input type="text" className="form-input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required /></div>
+              <div className="form-group"><label className="form-label">Email</label><input type="email" className="form-input" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required /></div>
+              <div className="form-group"><label className="form-label">Phone</label><input type="text" className="form-input" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required /></div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select className="form-select" value={form.role} onChange={e => setForm({...form, role: e.target.value})}>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Helper">Helper</option>
+                </select>
+              </div>
+              <div className="form-group"><label className="form-label">Department</label><input type="text" className="form-input" value={form.department} onChange={e => setForm({...form, department: e.target.value})} required /></div>
+              <div className="form-group"><label className="form-label">Designation</label><input type="text" className="form-input" value={form.designation} onChange={e => setForm({...form, designation: e.target.value})} required /></div>
+              <div className="form-group">
+                <label className="form-label">Shift</label>
+                <select className="form-select" value={form.shift} onChange={e => setForm({...form, shift: e.target.value})}>
+                  <option value="Morning Shift (08:00 AM - 02:00 PM)">Morning Shift (08:00 AM - 02:00 PM)</option>
+                  <option value="General Shift (09:00 AM - 05:00 PM)">General Shift (09:00 AM - 05:00 PM)</option>
+                  <option value="Afternoon Shift (12:00 PM - 06:00 PM)">Afternoon Shift (12:00 PM - 06:00 PM)</option>
+                  <option value="Daycare Shift (10:00 AM - 07:00 PM)">Daycare Shift (10:00 AM - 07:00 PM)</option>
+                </select>
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '10px' }}>Register</button>
+            </form>
+          </Modal>
+        </div>
+      );
+    };
+
+    // 4. ATTENDANCE MANAGEMENT PAGE
+    const AttendancePage = () => {
+      const [db, setDb] = useState(getDB());
+      const today = new Date().toISOString().split('T')[0];
+
+      const markStatus = (staffId, status) => {
+        const copy = { ...db };
+        const staff = copy.staff.find(s => s.staff_id === staffId);
+        
+        const existingIdx = copy.attendance.findIndex(a => a.staff_id === staffId && a.date === today);
+        const record = {
+          attendance_id: existingIdx !== -1 ? copy.attendance[existingIdx].attendance_id : copy.attendance.length + 1,
+          staff_id: staffId,
+          name: staff ? staff.name : 'Unknown',
+          role: staff ? staff.role : 'Teacher',
+          designation: staff ? staff.designation : '',
+          date: today,
+          check_in: status === 'Present' ? '08:50 AM' : null,
+          check_out: null,
+          attendance_status: status
+        };
+
+        if (existingIdx !== -1) {
+          copy.attendance[existingIdx] = record;
+        } else {
+          copy.attendance.push(record);
+        }
+
+        saveDB(copy);
+        setDb(copy);
+      };
+
+      return (
+        <div className="page-container">
+          <div className="card">
+            <h3 style={{ fontSize: '0.95rem', fontFamily: 'Outfit', marginBottom: '20px' }}>Today's Check-In Register ({today})</h3>
+            <div className="table-container">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Staff Name</th>
+                    <th>Role</th>
+                    <th>Timestamps</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {db.staff.map(s => {
+                    const log = db.attendance.find(a => a.staff_id === s.staff_id && a.date === today);
+                    return (
+                      <tr key={s.staff_id}>
+                        <td>
+                          <div style={{ fontWeight: '600' }}>{s.name}</div>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>ID: {s.staff_id}</span>
+                        </td>
+                        <td><span className={`badge ${s.role === 'Teacher' ? 'badge-present' : 'badge-leave'}`}>{s.role}</span></td>
+                        <td>
+                          <div style={{ fontSize: '0.75rem' }}>In: {log?.check_in || '--'}</div>
+                          <div style={{ fontSize: '0.75rem' }}>Out: {log?.check_out || '--'}</div>
+                        </td>
+                        <td>
+                          {log ? (
+                            <span className={`badge badge-${log.attendance_status.toLowerCase()}`}>{log.attendance_status}</span>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.75rem' }}>Unmarked</span>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
+                            <button className="btn btn-primary" style={{ padding: '6px 10px', fontSize: '0.75rem' }} onClick={() => markStatus(s.staff_id, 'Present')}>Present</button>
+                            <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: '0.75rem', borderColor: 'var(--warning)', color: 'var(--warning)' }} onClick={() => markStatus(s.staff_id, 'Half Day')}>Half Day</button>
+                            <button className="btn btn-danger" style={{ padding: '6px 10px', fontSize: '0.75rem' }} onClick={() => markStatus(s.staff_id, 'Absent')}>Absent</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 5. DUTY ROSTER PAGE
+    const RosterPage = () => {
+      const { isPrivileged } = useAuth();
+      const [db, setDb] = useState(getDB());
+      const today = new Date().toISOString().split('T')[0];
+
+      const handleAutoAllocate = () => {
+        if (confirm("Run the AI Auto Duty Allocation scheduler for today?")) {
+          const copy = { ...db };
+          const activeStaff = copy.staff.filter(s => s.status === 'Active');
+          const activeRooms = copy.classrooms.filter(c => c.status === 'Active');
+          
+          const teachers = activeStaff.filter(s => s.role === 'Teacher');
+          const helpers = activeStaff.filter(s => s.role === 'Helper');
+
+          const allocations = [];
+          
+          activeRooms.forEach((room, idx) => {
+            const t = teachers[idx] || teachers[0];
+            const h = helpers[idx] || helpers[0];
+
+            if (t) {
+              allocations.push({
+                roster_id: allocations.length + 1,
+                staff_id: t.staff_id,
+                staff_name: t.name,
+                role: 'Teacher',
+                classroom_id: room.classroom_id,
+                classroom_name: room.classroom_name,
+                shift: t.shift,
+                assigned_date: today
+              });
+            }
+
+            if (h) {
+              allocations.push({
+                roster_id: allocations.length + 1,
+                staff_id: h.staff_id,
+                staff_name: h.name,
+                role: 'Helper',
+                classroom_id: room.classroom_id,
+                classroom_name: room.classroom_name,
+                shift: h.shift,
+                assigned_date: today
+              });
+            }
+          });
+
+          copy.duty_roster = copy.duty_roster.filter(x => x.assigned_date !== today);
+          copy.duty_roster.push(...allocations);
+          
+          saveDB(copy);
+          setDb(copy);
+          alert("Duty roster auto allocation computed successfully!");
+        }
+      };
+
+      return (
+        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '0.95rem', fontFamily: 'Outfit' }}>Classroom Duty Sheets ({today})</h3>
+            {isPrivileged() && <button className="btn btn-secondary" onClick={handleAutoAllocate}>🧠 AI Auto-Allocate</button>}
+          </div>
+
+          <div className="table-container">
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>Classroom Name</th>
+                  <th>Educator / Teacher</th>
+                  <th>Classroom Helper</th>
+                  <th>Shift Coverage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {db.classrooms.map(room => {
+                  const tDuty = db.duty_roster.find(x => x.classroom_id === room.classroom_id && x.role === 'Teacher' && x.assigned_date === today);
+                  const hDuty = db.duty_roster.find(x => x.classroom_id === room.classroom_id && x.role === 'Helper' && x.assigned_date === today);
+                  return (
+                    <tr key={room.classroom_id}>
+                      <td style={{ fontWeight: '700' }}>{room.classroom_name}</td>
+                      <td>
+                        <div style={{ fontWeight: '600' }}>{tDuty?.staff_name || 'Unassigned'}</div>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{tDuty?.staff_id || '--'}</span>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: '600' }}>{hDuty?.staff_name || 'Unassigned'}</div>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{hDuty?.staff_id || '--'}</span>
+                      </td>
+                      <td style={{ fontSize: '0.75rem', fontWeight: '500' }}>{tDuty?.shift || 'Morning Shift'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
+    // 6. CLASSROOMS PAGE
+    const ClassroomsPage = () => {
+      const { isPrivileged } = useAuth();
+      const [db, setDb] = useState(getDB());
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [name, setName] = useState('');
+      const [capacity, setCapacity] = useState(15);
+
+      const handleAdd = (e) => {
+        e.preventDefault();
+        const copy = { ...db };
+        copy.classrooms.push({
+          classroom_id: copy.classrooms.length + 1,
+          classroom_name: name,
+          teacher_id: null,
+          teacherName: 'Unassigned',
+          helper_id: null,
+          helperName: 'Unassigned',
+          capacity,
+          status: 'Active'
+        });
+        saveDB(copy);
+        setDb(copy);
+        setIsModalOpen(false);
+        setName('');
+        setCapacity(15);
+      };
+
+      return (
+        <div className="page-container">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
+            {isPrivileged() && <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Add Classroom</button>}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            {db.classrooms.map(c => (
+              <div key={c.classroom_id} className="card card-hover" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h3 style={{ fontSize: '1rem', fontFamily: 'Outfit' }}>{c.classroom_name}</h3>
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Teacher Assigned:</span>
+                    <span style={{ fontWeight: '600' }}>{c.teacherName}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Helper Assigned:</span>
+                    <span style={{ fontWeight: '600' }}>{c.helperName}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Capacity:</span>
+                    <span style={{ fontWeight: '700' }}>{c.capacity} kids</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Register Classroom Layout">
+            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-group">
+                <label className="form-label">Classroom Name</label>
+                <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Max Child Capacity</label>
+                <input type="number" className="form-input" value={capacity} onChange={e => setCapacity(e.target.value)} required />
+              </div>
+              <button type="submit" className="btn btn-primary">Create Room</button>
+            </form>
+          </Modal>
+        </div>
+      );
+    };
+
+    // 7. TASKS PAGE
+    const TasksPage = () => {
+      const { user, isPrivileged } = useAuth();
+      const [db, setDb] = useState(getDB());
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [title, setTitle] = useState('');
+      const [desc, setDesc] = useState('');
+      const [assigned, setAssigned] = useState('');
+      const [priority, setPriority] = useState('Medium');
+      const [date, setDate] = useState('');
+
+      const handleAdd = (e) => {
+        e.preventDefault();
+        const copy = { ...db };
+        const staff = copy.staff.find(s => s.staff_id === assigned);
+        copy.tasks.push({
+          task_id: copy.tasks.length + 1,
+          assigned_to: assigned,
+          assigned_name: staff ? staff.name : 'Unknown',
+          title,
+          description: desc,
+          priority,
+          due_date: date,
+          status: 'Pending'
+        });
+        saveDB(copy);
+        setDb(copy);
+        setIsModalOpen(false);
+        setTitle('');
+        setDesc('');
+        setAssigned('');
+        setPriority('Medium');
+        setDate('');
+      };
+
+      const handleStatus = (id, status) => {
+        const copy = { ...db };
+        const idx = copy.tasks.findIndex(t => t.task_id === id);
+        if (idx !== -1) {
+          copy.tasks[idx].status = status;
+          saveDB(copy);
+          setDb(copy);
+        }
+      };
+
+      const getTasksByStatus = (status) => {
+        const list = isPrivileged() ? db.tasks : db.tasks.filter(t => t.assigned_to === user.staff_id);
+        return list.filter(t => t.status === status);
+      };
+
+      return (
+        <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {isPrivileged() && <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>Create Task</button>}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }} className="grid-cols-3">
+            {['Pending', 'In Progress', 'Completed'].map(col => (
+              <div key={col} className="card" style={{ backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '14px', minHeight: '400px' }}>
+                <h4 style={{ fontSize: '0.85rem', fontFamily: 'Outfit', textTransform: 'uppercase', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>{col} Tasks</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, overflowY: 'auto' }}>
+                  {getTasksByStatus(col).map(t => (
+                    <div key={t.task_id} className="card" style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span className={`badge badge-${t.priority.toLowerCase()}`} style={{ alignSelf: 'flex-start', fontSize: '0.6rem' }}>{t.priority}</span>
+                      <h5 style={{ fontSize: '0.8rem', fontWeight: '700' }}>{t.title}</h5>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t.description}</p>
+                      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '6px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem' }}>
+                        <span>👤 {t.assigned_name}</span>
+                        {col === 'Pending' && <button className="btn btn-outline" style={{ padding: '2px 6px', fontSize: '0.65rem' }} onClick={() => handleStatus(t.task_id, 'In Progress')}>Start</button>}
+                        {col === 'In Progress' && <button className="btn btn-primary" style={{ padding: '2px 6px', fontSize: '0.65rem' }} onClick={() => handleStatus(t.task_id, 'Completed')}>Complete</button>}
+                        {col === 'Completed' && <button className="btn btn-outline" style={{ padding: '2px 6px', fontSize: '0.65rem' }} onClick={() => handleStatus(t.task_id, 'Pending')}>Reopen</button>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Assign Checklist Activity">
+            <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-group">
+                <label className="form-label">Task Title</label>
+                <input type="text" className="form-input" value={title} onChange={e => setTitle(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Task Description</label>
+                <textarea className="form-textarea" value={desc} onChange={e => setDesc(e.target.value)} rows="3" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Assign To</label>
+                <select className="form-select" value={assigned} onChange={e => setAssigned(e.target.value)} required>
+                  <option value="">Select staff...</option>
+                  {db.staff.map(s => <option key={s.staff_id} value={s.staff_id}>{s.name} ({s.role})</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Priority</label>
+                <select className="form-select" value={priority} onChange={e => setPriority(e.target.value)}>
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Due Date</label>
+                <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} required />
+              </div>
+              <button type="submit" className="btn btn-primary">Save Task</button>
+            </form>
+          </Modal>
+        </div>
+      );
+    };
+
+    // 8. REPORTS PAGE
+    const ReportsPage = () => {
+      const [db] = useState(getDB());
+      const [reportType, setReportType] = useState('attendance');
+      const [startDate, setStartDate] = useState('2026-06-01');
+      const [endDate, setEndDate] = useState('2026-06-30');
+      const [staffId, setStaffId] = useState('');
+      const [reportData, setReportData] = useState(null);
+
+      const handleGenerateReport = () => {
+        if (reportType === 'attendance') {
+          let records = db.attendance;
+          if (startDate) records = records.filter(r => r.date >= startDate);
+          if (endDate) records = records.filter(r => r.date <= endDate);
+          if (staffId) records = records.filter(r => r.staff_id === staffId);
+          
+          const total = records.length;
+          const present = records.filter(r => r.attendance_status === 'Present').length;
+          const halfDay = records.filter(r => r.attendance_status === 'Half Day').length;
+          const absent = records.filter(r => r.attendance_status === 'Absent').length;
+          const leave = records.filter(r => r.attendance_status === 'Leave').length;
+          const rate = total > 0 ? (((present + (halfDay * 0.5)) / total) * 100).toFixed(1) : 100;
+
+          setReportData({
+            records,
+            summary: {
+              totalDays: total,
+              present,
+              halfDay,
+              absent,
+              leave,
+              attendanceRate: parseFloat(rate)
+            }
+          });
+        } else if (reportType === 'performance') {
+          const data = db.staff.map(s => {
+            const sTasks = db.tasks.filter(t => t.assigned_to === s.staff_id);
+            const completed = sTasks.filter(t => t.status === 'Completed').length;
+            const taskRate = sTasks.length > 0 ? Math.round((completed / sTasks.length) * 100) : 100;
+
+            const sAtt = db.attendance.filter(a => a.staff_id === s.staff_id);
+            const present = sAtt.filter(a => a.attendance_status === 'Present').length;
+            const attRate = sAtt.length > 0 ? Math.round((present / sAtt.length) * 100) : 100;
+
+            return {
+              staff_id: s.staff_id,
+              name: s.name,
+              role: s.role,
+              taskCompletion: taskRate,
+              attendanceRate: attRate,
+              overallScore: Math.round((taskRate + attRate) / 2)
+            };
+          });
+          setReportData(data);
+        } else {
+          let filtered = db.duty_roster;
+          if (startDate) filtered = filtered.filter(r => r.assigned_date >= startDate);
+          if (endDate) filtered = filtered.filter(r => r.assigned_date <= endDate);
+          if (staffId) filtered = filtered.filter(r => r.staff_id === staffId);
+          setReportData(filtered);
+        }
+      };
+
+      useEffect(() => {
+        handleGenerateReport();
+      }, [reportType, startDate, endDate, staffId]);
+
+      const handleExport = (format) => {
+        if (!reportData) {
+          alert("No data available to export.");
+          return;
+        }
+
+        if (format === 'CSV') {
+          let headers = '';
+          let rows = [];
+
+          if (reportType === 'attendance') {
+            headers = 'Staff ID,Name,Date,Check In,Check Out,Status\n';
+            rows = reportData.records.map(r => `${r.staff_id},"${r.name}",${r.date},${r.check_in || ''},${r.check_out || ''},${r.attendance_status}`);
+          } else if (reportType === 'performance') {
+            headers = 'Staff ID,Name,Role,Task Completion %,Attendance Rate %,Overall Index\n';
+            rows = reportData.map(r => `${r.staff_id},"${r.name}","${r.role}",${r.taskCompletion},${r.attendanceRate},${r.overallScore}`);
+          } else {
+            headers = 'Date,Classroom,Staff ID,Staff Name,Role,Shift\n';
+            rows = reportData.map(r => `${r.assigned_date},"${r.classroom_name}",${r.staff_id},"${r.staff_name}","${r.role}","${r.shift}"`);
+          }
+
+          const blob = new Blob([headers + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.setAttribute("href", url);
+          link.setAttribute("download", `Intellitots_${reportType}_report.csv`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          alert(`Success! Generated report download formatted in ${format} format. Check your downloads folder.`);
+        }
+      };
+
+      return (
+        <div className="page-container animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Filters card */}
+          <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Report Category</label>
+              <select value={reportType} onChange={e => { setReportType(e.target.value); setReportData(null); }} className="form-select">
+                <option value="attendance">Attendance Activity Ledger</option>
+                <option value="performance">Staff Performance Metrics</option>
+                <option value="duties">Classroom Duty Allocations</option>
+              </select>
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Start Date</label>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="form-input" />
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">End Date</label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-input" />
+            </div>
+
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Filter Staff ID</label>
+              <select value={staffId} onChange={e => setStaffId(e.target.value)} className="form-select">
+                <option value="">All Staff</option>
+                {db.staff.map(s => <option key={s.staff_id} value={s.staff_id}>{s.staff_id} - {s.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Download buttons */}
+          {reportData && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button className="btn btn-outline" onClick={() => handleExport('PDF')}>📄 Save PDF Report</button>
+              <button className="btn btn-outline" onClick={() => handleExport('Excel')}>📊 Save Excel Sheet</button>
+              <button className="btn btn-primary" onClick={() => handleExport('CSV')}>📥 Download CSV</button>
+            </div>
+          )}
+
+          {/* Results table */}
+          {reportData ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {reportType === 'attendance' && reportData.summary && (
+                <>
+                  <div className="grid-cols-4">
+                    <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ATTENDANCE RATE</span>
+                      <h4 style={{ fontSize: '1.4rem', fontFamily: 'Outfit', color: 'var(--success)' }}>{reportData.summary.attendanceRate}%</h4>
+                    </div>
+                    <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>TOTAL LOGGED DAYS</span>
+                      <h4 style={{ fontSize: '1.4rem', fontFamily: 'Outfit', color: 'var(--primary)' }}>{reportData.summary.totalDays}</h4>
+                    </div>
+                    <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ABSENCES FLAGS</span>
+                      <h4 style={{ fontSize: '1.4rem', fontFamily: 'Outfit', color: 'var(--danger)' }}>{reportData.summary.absent}</h4>
+                    </div>
+                    <div className="card" style={{ textAlign: 'center', padding: '12px' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>APPROVED LEAVES</span>
+                      <h4 style={{ fontSize: '1.4rem', fontFamily: 'Outfit', color: 'var(--info)' }}>{reportData.summary.leave}</h4>
+                    </div>
+                  </div>
+
+                  <div className="table-container">
+                    <table className="custom-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Staff ID</th>
+                          <th>Name</th>
+                          <th>Role</th>
+                          <th>Clock In</th>
+                          <th>Clock Out</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reportData.records.map((r, i) => (
+                          <tr key={i}>
+                            <td style={{ fontWeight: '600' }}>{r.date}</td>
+                            <td style={{ fontWeight: '700' }}>{r.staff_id}</td>
+                            <td style={{ fontWeight: '600' }}>{r.name}</td>
+                            <td>{r.role}</td>
+                            <td>{r.check_in || '--'}</td>
+                            <td>{r.check_out || '--'}</td>
+                            <td><span className={`badge badge-${r.attendance_status.toLowerCase().replace(' ', '')}`}>{r.attendance_status}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {reportType === 'performance' && (
+                <div className="table-container">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Staff Member</th>
+                        <th>Role</th>
+                        <th>Tasks Completed %</th>
+                        <th>Attendance Rate %</th>
+                        <th>Overall Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportData.map((r, i) => (
+                        <tr key={i}>
+                          <td style={{ fontWeight: '600' }}>{r.name} ({r.staff_id})</td>
+                          <td><span className={`badge ${r.role === 'Teacher' ? 'badge-present' : 'badge-leave'}`}>{r.role}</span></td>
+                          <td style={{ fontWeight: '700' }}>{r.taskCompletion}%</td>
+                          <td style={{ fontWeight: '700' }}>{r.attendanceRate}%</td>
+                          <td>
+                            <span className={`badge badge-${r.overallScore >= 80 ? 'present' : 'halfday'}`}>
+                              {r.overallScore}% - {r.overallScore >= 80 ? 'Excellent' : 'Satisfactory'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {reportType === 'duties' && (
+                <div className="table-container">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Assigned Date</th>
+                        <th>Classroom Target</th>
+                        <th>Staff Name</th>
+                        <th>Workspace Role</th>
+                        <th>Assigned Shift</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportData.map((r, i) => (
+                        <tr key={i}>
+                          <td style={{ fontWeight: '600' }}>{r.assigned_date}</td>
+                          <td style={{ fontWeight: '600' }}>{r.classroom_name}</td>
+                          <td style={{ fontWeight: '600' }}>{r.staff_name} ({r.staff_id})</td>
+                          <td>{r.role}</td>
+                          <td style={{ fontSize: '0.75rem' }}>{r.shift}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+              Configure filters to display analytics summaries.
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // 9. NOTIFICATIONS PAGE
+    const NotificationsPage = () => {
+      const { user } = useAuth();
+      const [db, setDb] = useState(getDB());
+
+      const handleClear = (id) => {
+        const copy = { ...db };
+        const idx = copy.notifications.findIndex(n => n.notification_id === id);
+        if (idx !== -1) {
+          copy.notifications[idx].is_read = true;
+          saveDB(copy);
+          setDb(copy);
+        }
+      };
+
+      const myNotifications = db.notifications.filter(n => n.user_id === user.id);
+
+      return (
+        <div className="page-container" style={{ maxWidth: '750px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {myNotifications.length === 0 ? (
+              <div className="card text-center" style={{ color: 'var(--text-muted)' }}>Zero alerts. Inbox is empty.</div>
+            ) : (
+              myNotifications.map(n => (
+                <div key={n.notification_id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: n.is_read ? 0.7 : 1 }}>
+                  <div>
+                    <p style={{ fontWeight: n.is_read ? '500' : '700', fontSize: '0.85rem' }}>{n.message}</p>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Type: {n.type}</span>
+                  </div>
+                  {!n.is_read && <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '0.7rem' }} onClick={() => handleClear(n.notification_id)}>Clear</button>}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // 10. PROFILE PAGE
+    const ProfilePage = () => {
+      const { user } = useAuth();
+      return (
+        <div className="page-container">
+          <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
+            <h3 style={{ fontSize: '0.95rem', fontFamily: 'Outfit', marginBottom: '20px' }}>Personal Security Settings</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.85rem' }}>
+              <div>
+                <label className="form-label">Full Name</label>
+                <input type="text" className="form-input" value={user?.name} disabled style={{ backgroundColor: '#f1f5f9' }} />
+              </div>
+              <div>
+                <label className="form-label">Email Address</label>
+                <input type="text" className="form-input" value={user?.email} disabled style={{ backgroundColor: '#f1f5f9' }} />
+              </div>
+              <div>
+                <label className="form-label">System Role Access</label>
+                <input type="text" className="form-input" value={user?.role} disabled style={{ backgroundColor: '#f1f5f9' }} />
+              </div>
+              <button className="btn btn-primary" onClick={() => alert("Settings saved.")} style={{ alignSelf: 'flex-start', marginTop: '10px' }}>Save Settings</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ========================================================
+    // MAIN APP MATRIX SHELL LAYOUT
+    // ========================================================
+    const AppShell = () => {
+      const { user, logout, isPrivileged } = useAuth();
+      const [currentPage, setCurrentPage] = useState('dashboard');
+      const [count, setCount] = useState(0);
+
+      useEffect(() => {
+        if (user) {
+          const db = getDB();
+          const list = db.notifications.filter(n => n.user_id === user.id && !n.is_read);
+          setCount(list.length);
+        }
+      }, [currentPage, user]);
+
+      if (!user) {
+        return <LoginPage />;
+      }
+
+      return (
+        <div className="app-container">
+          
+          {/* Sidebar */}
+          <div style={{ width: 'var(--sidebar-width)', backgroundColor: '#0f172a', color: '#f8fafc', display: 'flex', flexDirection: 'column', minHeight: '100vh', flexShrink: 0 }}>
+            <div style={{ padding: '24px', borderBottom: '1px solid #1e293b' }}>
+              <h2 style={{ color: '#ffffff', fontSize: '1.1rem', fontFamily: 'Outfit' }}>FirstCry Intellitots</h2>
+              <span style={{ fontSize: '0.7rem', color: '#64748b' }}>CENTRE PORTAL</span>
+            </div>
+            
+            <nav style={{ flex: 1, padding: '20px 12px' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {[
+                  { id: 'dashboard', label: 'Dashboard', visible: true },
+                  { id: 'staff', label: 'Staff Management', visible: isPrivileged() },
+                  { id: 'attendance', label: 'Attendance', visible: true },
+                  { id: 'roster', label: 'Duty Roster', visible: true },
+                  { id: 'classrooms', label: 'Classrooms', visible: true },
+                  { id: 'tasks', label: 'Tasks Board', visible: true },
+                  { id: 'reports', label: 'Reports & Analytics', visible: isPrivileged() },
+                  { id: 'notifications', label: 'Notifications', visible: true },
+                  { id: 'settings', label: 'Profile Settings', visible: true }
+                ].filter(x => x.visible).map(item => {
+                  const active = currentPage === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => setCurrentPage(item.id)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          padding: '12px 16px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          backgroundColor: active ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                          color: active ? '#818cf8' : '#94a3b8',
+                          cursor: 'pointer',
+                          fontWeight: active ? '600' : '500',
+                          textAlign: 'left',
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <div style={{ padding: '16px', borderTop: '1px solid #1e293b', backgroundColor: '#0b0f19', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ fontSize: '0.8rem', color: '#ffffff', fontWeight: '600', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{user.name}</p>
+                <p style={{ fontSize: '0.65rem', color: '#64748b' }}>{user.role}</p>
+              </div>
+              <button onClick={logout} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem' }}>Exit</button>
+            </div>
+          </div>
+
+          {/* Core viewport */}
+          <div className="main-content">
+            <header style={{ height: '70px', backgroundColor: '#ffffff', borderBottom: '1px solid var(--border)', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h1 style={{ fontSize: '1.2rem', textTransform: 'capitalize', fontFamily: 'Outfit' }}>{currentPage} View</h1>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>FirstCry Intellitots &bull; System Active</p>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <span className="badge badge-present" style={{ fontSize: '0.65rem' }}>🟢 Local Demo Active</span>
+                
+                <button onClick={() => setCurrentPage('notifications')} style={{ border: 'none', background: 'none', cursor: 'pointer', position: 'relative', padding: '6px' }}>
+                  🔔 {count > 0 && <span style={{ position: 'absolute', top: 0, right: 0, backgroundColor: 'var(--danger)', color: 'white', borderRadius: '50%', width: '14px', height: '14px', fontSize: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{count}</span>}
+                </button>
+              </div>
+            </header>
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {currentPage === 'dashboard' && <DashboardPage setCurrentPage={setCurrentPage} />}
+              {currentPage === 'staff' && <StaffPage />}
+              {currentPage === 'attendance' && <AttendancePage />}
+              {currentPage === 'roster' && <RosterPage />}
+              {currentPage === 'classrooms' && <ClassroomsPage />}
+              {currentPage === 'tasks' && <TasksPage />}
+              {currentPage === 'reports' && <ReportsPage />}
+              {currentPage === 'notifications' && <NotificationsPage />}
+              {currentPage === 'settings' && <ProfilePage />}
+            </div>
+          </div>
+
+        </div>
+      );
+    };
+
+    const App = () => (
+      <AuthProvider>
+        <AppShell />
+      </AuthProvider>
+    );
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
